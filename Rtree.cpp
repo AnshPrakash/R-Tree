@@ -1,4 +1,5 @@
 #include "Rtree.h"
+#include<cstring>
 
 
 Node::Node(int d, int maxCap){
@@ -15,7 +16,7 @@ Btree::Btree(int dim, int maxChildren, FileHandler& fh){
   height = 0;
   Node root = AllocateNode(fh,-1);
   rootPageId = root.pageId;
-  noOfelement = 4 + 2*d + (2*d + 1)*maxCap;
+  noOfElement = 4 + 2*d + (2*d + 1)*maxCap;
 
 }
 
@@ -27,7 +28,7 @@ Node Btree::AllocateNode(FileHandler& fh, int parentId ){
   return n;
 }
 
-Node Btree::Diskwrite(Node& n,FileHandler& fh){
+Node Btree::DiskWrite(Node& n,FileHandler& fh){
   PageHandler ph = fh.PageAt(n.pageId);// going to disk or buffer check?
   char *data = ph.GetData();
   std::vector< int > v;
@@ -46,11 +47,11 @@ Node Btree::Diskwrite(Node& n,FileHandler& fh){
   fh.FlushPage(n.pageId);
   return n;
 }
-Node Btree::DiskRead(int id){
-  PageHandler ph = fh.PageAt(n.pageId);
+Node Btree::DiskRead(int id,FileHandler& fh){
+  PageHandler ph = fh.PageAt(id);
   char *data = ph.GetData();
-  std::vector< int > v(noOfelement);
-  memcpy(&v[0],&data[0],noOfelement*sizeof(int));
+  std::vector< int > v(noOfElement);
+  memcpy(&v[0],&data[0],noOfElement*sizeof(int));
   Node n = Node(d,maxCap);
   n.pageId = v[0];
   n.parentId = v[1];
@@ -66,4 +67,20 @@ Node Btree::DiskRead(int id){
   idx += 1;
   memcpy(&n.size,&v[idx],sizeof(int));
   return n;
+}
+
+bool Btree::Equal(Node& n1,Node& n2){
+  if( n1.pageId != n2.pageId) return false;
+  if( n1.parentId != n2.parentId ) return false;
+  if(n1.MBR.size() != n2.MBR.size()) return false;
+  for(int i = 0; i < n1.MBR.size();i++) if(n1.MBR[i] != n2.MBR[i]) return false;
+  if(n1.childptr.size() != n2.childptr.size()) return false;
+  for(int i = 0; i < maxCap; i++){
+    if(n1.childMBR[i].size() != n2.childMBR[i].size() ) return false;
+    if(n1.childptr[i] != n2.childptr[i]) return false;
+    for(int j = 0; j < n1.childMBR[i].size(); j++) if(n1.childMBR[i][j] != n2.childMBR[i][j]) return false;
+  }
+  if(n1.leaf != n2.leaf) return false;
+  if(n1.size != n2.size) return false;
+  return true;
 }
