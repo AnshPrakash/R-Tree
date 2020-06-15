@@ -24,6 +24,7 @@ class Btree{
 public:
   int d;        // dimension of points in R tree
   int maxCap;   // maximum no. of children in a node
+  int m;        // minimum no. of children in a node
   int M;        // maximum no. of nodes in a Page
   int rootPageId;
   int height;
@@ -32,7 +33,15 @@ public:
   Node DiskRead(int id,FileHandler& fh);            // read the page corresponding to the node to disk
   Node DiskWrite(Node& n,FileHandler& fh);          // write the page corresponding to the node to disk
   Node AllocateNode(FileHandler&,int parentid);  // Allocate page for the node
-  bool Equal(Node& n1,Node& n2);
+  bool Equal(Node& n1,Node& n2); //check if two Node are equal or not just for debugging purpose
+  
+  // Todo
+  bool Insert(std::vector< int > MBR, FileHandler& fh);
+  bool InsertNonFull(std::vector< int > MBR,int nodeid, FileHandler& fh);
+  void SplitChild(int k,int nodeid) // split kth child of node with id as nodeid
+  QuadraticSplit(int nodeid);// what should I return? Let's what suit best with SplitChild
+  bool Search(std::vector< int > MBR, int nodeid, FileHandler& fh);
+  bool BulkLoad(FileHandler& fh, FileHandler& input);
 };
 
 #endif

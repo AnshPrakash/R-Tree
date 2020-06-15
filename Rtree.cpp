@@ -1,5 +1,6 @@
 #include "Rtree.h"
 #include<cstring>
+#include <cmath>
 
 
 Node::Node(int d, int maxCap){
@@ -13,6 +14,7 @@ Btree::Btree(int dim, int maxChildren, FileHandler& fh){
   d = dim;
   maxCap =  (PAGE_CONTENT_SIZE - 8*d - 16)/(8*d+4);
   maxCap = std::min(maxChildren,maxCap); //  fit in a page
+  m = (int)ceil(maxCap/2.0);
   height = 0;
   Node root = AllocateNode(fh,-1);
   rootPageId = root.pageId;
@@ -47,6 +49,7 @@ Node Btree::DiskWrite(Node& n,FileHandler& fh){
   fh.FlushPage(n.pageId);
   return n;
 }
+
 Node Btree::DiskRead(int id,FileHandler& fh){
   PageHandler ph = fh.PageAt(id);
   char *data = ph.GetData();
