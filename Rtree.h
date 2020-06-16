@@ -30,24 +30,25 @@ public:
   int height;
   int noOfElement;
   Btree(int dim, int maxChildren, FileHandler& fh);
-  Node DiskRead(int id,FileHandler& fh);            // read the page corresponding to the node to disk
-  Node DiskWrite(Node& n,FileHandler& fh);          // write the page corresponding to the node to disk
-  Node AllocateNode(FileHandler&,int parentid);  // Allocate page for the node
-  bool Equal(Node& n1,Node& n2); //check if two Node are equal or not just for debugging purpose
-  bool DeleteNode(Node& n, FileHandler& fh);  // delete the node from disk
+  Node DiskRead(int id,FileHandler& fh);              // read the page corresponding to the node to disk
+  Node DiskWrite(Node& n,FileHandler& fh);            // write the page corresponding to the node to disk
+  Node AllocateNode(FileHandler&,int parentid);       // Allocate page for the node
+  bool Equal(Node& n1,Node& n2);                      //check if two Node are equal or not just for debugging purpose
+  bool DeleteNode(Node& n, FileHandler& fh);          // delete the node from disk
+  void SplitChild(int k,Node& n,FileHandler& fh);     // split kth child of node
   // Todo
-  bool Insert(std::vector< int > MBR, FileHandler& fh);
-  bool InsertNonFull(std::vector< int > MBR,int nodeid, FileHandler& fh);
-  void SplitChild(int k,Node& n,FileHandler& fh); // split kth child of node
-  std::vector< Node > QuadraticSplit(Node& n);// what should I return? Let's what suit best with SplitChild
-  bool Search(std::vector< int > MBR, int nodeid, FileHandler& fh);
+  bool Insert(const std::vector< int >& MBR, FileHandler& fh);
+  bool InsertNonFull(const std::vector< int >& MBR, int nodeid, FileHandler& fh);
+  std::vector< Node > QuadraticSplit(const Node& n, FileHandler& fh);  // split a node into two and return the nodes as vector
+  bool Search(const std::vector< int >& MBR, int nodeid, FileHandler& fh);
   bool BulkLoad(FileHandler& fh, FileHandler& input);
   //helper functions
-  bool contains(std::vector<int> p, std::vector<int> MBR);// check if MBR contains p
-  int VolMBR( std::vector< int >);//volume of single MBR
-  int VolMBRS( std::vector< std::vector< int> > MBRs, int nsize);// sum of volume of all MBRs
-  int DeadSpace( int nsize, std::vector< std::vector< int >> Elist , std::vector< int > MBR);// wasted space in MBR containing E list MBRs
-  std::vector< int > MinBoundingRegion(std::vector< std::vector<int >> Elist, int nsize); //  minimum bounding region of a list of MBR
+  std::vector< int > seed(const Node& n);             // seed the QudraticSplit Algo
+  bool contains(const std::vector< int >& p, const std::vector< int >& MBR);        // check if MBR contains p
+  int VolMBR( const std::vector< int >&);                                //volume of single MBR
+  int VolMBRS( const std::vector< std::vector<int >>& MBRs, int nsize); // sum of volume of all MBRs
+  int DeadSpace( int nsize, const std::vector< std::vector<int >>& Elist , const std::vector< int >& MBR);// wasted space in MBR containing E list MBRs
+  std::vector< int > MinBoundingRegion(const std::vector< std::vector<int >>& Elist, int nsize);    //  minimum bounding region of a list of MBR
 };
 
 

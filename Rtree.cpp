@@ -94,32 +94,32 @@ bool Btree::DeleteNode(Node& n, FileHandler& fh){
   return (fh.DisposePage(n.pageId));
 }
 
-bool Btree::contains(std::vector<int> p, std::vector<int> MBR){
+bool Btree::contains(const std::vector< int >& p, const std::vector< int >& MBR){
   for(int i = 0; i < d; i++){
     if( MBR[2*i] > p[2*i] || MBR[i*2 + 1] < p[2*i + 1] ) return false;
   }
   return true;
 }
 
-int Btree::VolMBR( std::vector< int > MBR){
+int Btree::VolMBR( const std::vector< int >& MBR){
   int vol = 1;
   for(int i = 0; i < d; i++) vol = vol*(MBR[2*i + 1] - MBR[2*i]);
   return vol;
 }
 
-int Btree::VolMBRS( std::vector< std::vector< int> > MBRs, int nsize){
+int Btree::VolMBRS( const std::vector< std::vector<int >>& MBRs, int nsize){
   int vol = 0;
   for( int i = 0 ; i < nsize; i++) vol += VolMBR(MBRs[i]);
   return vol;
 }
 
-int Btree::DeadSpace(int nsize ,std::vector< std::vector< int >> Elist , std::vector< int > MBR){
+int Btree::DeadSpace(int nsize ,const std::vector< std::vector<int >>& Elist , const std::vector< int >& MBR){
   int v1 = VolMBRS(Elist,nsize);
   int v2 = VolMBR(MBR);
   return ( v2 - v1);
 }
 
-std::vector< int > Btree::MinBoundingRegion(std::vector< std::vector<int >> Elist, int nsize){
+std::vector< int > Btree::MinBoundingRegion(const std::vector< std::vector<int >>& Elist, int nsize){
   std::vector< int > mbr(2*d);
   for(int i = 0; i < d; i++){
     mbr[2*i] = INT_MAX;
@@ -135,7 +135,7 @@ std::vector< int > Btree::MinBoundingRegion(std::vector< std::vector<int >> Elis
 void Btree::SplitChild(int k,Node& n,FileHandler& fh){
   int id = n.childptr[k];
   Node ch = DiskRead(id,fh);
-  std::vector< Node > div = QuadraticSplit(ch);
+  std::vector< Node > div = QuadraticSplit(ch,fh);
   Node n1,n2;
   n1 = div[0], n2 = div[1];
   n.childptr[k] = n1.pageId;
@@ -149,8 +149,81 @@ void Btree::SplitChild(int k,Node& n,FileHandler& fh){
   DiskWrite(n2,fh);
 }
 
-std::vector< Node > Btree::QuadraticSplit(Node& n){
-  std::vector< Node > v;
-  return v;
+
+std::vector< int > Btree::seed(const Node& n){
+  int maxdiff = -1;
+  int e1,e2;
+  e1 = e2 = -1;
+  for(int i = 0; i < n.size; i++){
+    for(int j = i + 1; j < n.size; j++){
+      int val = DeadSpace(2,{n.childMBR[i],n.childMBR[i]},MinBoundingRegion({n.childMBR[i],n.childMBR[i]},2));
+      if( maxdiff < val ){
+        maxdiff = val ;
+        e1 = i;
+        e2 = j;
+      }
+    }
+  }
+  return(std::vector<int>({e1,e2}));
+}
+
+std::vector< Node > Btree::QuadraticSplit(const Node& n, FileHandler& fh){
+  int e1,e2;
+  std::vector<int > seedv = seed(n);
+  e1 = seedv[0],e2 = seedv[1];
+  std::vector< int > L1,L2;
+  L1.push_back(e1);L2.push_back(e2);
+  std::vector< int > E;
+  for(int i = 0; i < n.size; i++) if ( i != e1 || i != e2) E.push_back(i);
+  std::vector<std::vector< int >> mbrL1,mbrL2;
+  mbrL1.push_back(n.childMBR[e1]);
+  mbrL2.push_back(n.childMBR[e2]);
+  while( !E.empty() ){
+    int maxdiff = -1;
+    int idx = -1;
+    std::vector<std::vector< int >> tp1,tp2;
+    for(auto i: E){
+      int d1,d2;
+      std::vector<std::vector< int >> temp1,temp2;
+      temp1 = mbrL1;temp2 = mbrL2;
+      temp1.push_back(n.childMBR[i]);
+      temp2.push_back(n.childMBR[i]);
+      d1 = DeadSpace(temp1.size(),temp1, MinBoundingRegion(temp1,temp1.size()));
+      d2 = DeadSpace(temp2.size(),temp2, MinBoundingRegion(temp2,temp2.size()));;
+      if( std::abs(d1 - d2) > maxdiff){
+        idx = i;
+        maxdiff = std::abs(d1 - d2);
+        tp1 = temp1;
+        tp2 = temp2;
+      }
+    }
+    int d1 = VolMBRS({MinBoundingRegion(tp1,tp1.size())},1);
+    d1 -= VolMBRS(mbrL1,mbrL1.size());
+    int d2 = VolMBRS({MinBoundingRegion(tp2,tp2.size())},1);
+    d2 -= VolMBRS(mbrL2,mbrL2.size());
+    if( d1 < d2 ){
+      mbrL1 = tp1;
+      L1.push_back(idx);
+    }
+    else{
+      mbrL2 = tp2;
+      L2.push_back(idx); 
+    }
+    E.erase(E.begin() + idx);
+  }
+  Node n1,n2;
+  n1 = AllocateNode(fh,n.parentId);
+  n2 = AllocateNode(fh,n.parentId);
+  for( auto i : L1){
+    n1.childMBR[n1.size] = n.childMBR[i];
+    n1.childptr[n1.size] = n.childptr[i];
+    n1.size += 1;
+  }
+  for( auto i : L2){
+    n2.childMBR[n2.size] = n.childMBR[i];
+    n2.childptr[n2.size] = n.childptr[i];
+    n2.size += 1;
+  }
+  return (std::vector< Node >({n1,n2}));
 }
 
