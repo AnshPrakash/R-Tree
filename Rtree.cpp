@@ -7,6 +7,7 @@ Node::Node(int d, int maxCap){
   MBR = std::vector< int >(2*d,INT_MIN);
   childMBR = std::vector< std::vector< int > >(maxCap,std::vector< int >(2*d,INT_MIN));
   childptr = std::vector< int >(maxCap,-1);
+  size = 0;
 }
 
 
@@ -87,3 +88,69 @@ bool Btree::Equal(Node& n1,Node& n2){
   if(n1.size != n2.size) return false;
   return true;
 }
+
+
+bool Btree::DeleteNode(Node& n, FileHandler& fh){
+  return (fh.DisposePage(n.pageId));
+}
+
+bool Btree::contains(std::vector<int> p, std::vector<int> MBR){
+  for(int i = 0; i < d; i++){
+    if( MBR[2*i] > p[2*i] || MBR[i*2 + 1] < p[2*i + 1] ) return false;
+  }
+  return true;
+}
+
+int Btree::VolMBR( std::vector< int > MBR){
+  int vol = 1;
+  for(int i = 0; i < d; i++) vol = vol*(MBR[2*i + 1] - MBR[2*i]);
+  return vol;
+}
+
+int Btree::VolMBRS( std::vector< std::vector< int> > MBRs, int nsize){
+  int vol = 0;
+  for( int i = 0 ; i < nsize; i++) vol += VolMBR(MBRs[i]);
+  return vol;
+}
+
+int Btree::DeadSpace(int nsize ,std::vector< std::vector< int >> Elist , std::vector< int > MBR){
+  int v1 = VolMBRS(Elist,nsize);
+  int v2 = VolMBR(MBR);
+  return ( v2 - v1);
+}
+
+std::vector< int > Btree::MinBoundingRegion(std::vector< std::vector<int >> Elist, int nsize){
+  std::vector< int > mbr(2*d);
+  for(int i = 0; i < d; i++){
+    mbr[2*i] = INT_MAX;
+    mbr[2*i + 1] = INT_MIN;
+    for(int e = 0; e < nsize; e++){
+      mbr[2*i] = std::min(Elist[e][2*i], mbr[2*i]);
+      mbr[2*i + 1] = std::max(Elist[e][2*i+1], mbr[2*i + 1]);
+    }
+  }
+  return mbr;
+}
+
+void Btree::SplitChild(int k,Node& n,FileHandler& fh){
+  int id = n.childptr[k];
+  Node ch = DiskRead(id,fh);
+  std::vector< Node > div = QuadraticSplit(ch);
+  Node n1,n2;
+  n1 = div[0], n2 = div[1];
+  n.childptr[k] = n1.pageId;
+  n.childMBR[k] = n1.MBR;
+  n.childptr[n.size] = n2.pageId;
+  n.childMBR[n.size] = n2.MBR;
+  n.size += 1;
+  DeleteNode(ch,fh);
+  DiskWrite(n,fh);
+  DiskWrite(n1,fh);
+  DiskWrite(n2,fh);
+}
+
+std::vector< Node > Btree::QuadraticSplit(Node& n){
+  std::vector< Node > v;
+  return v;
+}
+
