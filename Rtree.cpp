@@ -20,7 +20,8 @@ Btree::Btree(int dim, int maxChildren, FileHandler& fh){
   Node root = AllocateNode(fh,-1);
   rootPageId = root.pageId;
   noOfElement = 4 + 2*d + (2*d + 1)*maxCap;
-
+  root.leaf = true;
+  root.size = 0;
 }
 
 Node Btree::AllocateNode(FileHandler& fh, int parentId ){
@@ -132,6 +133,86 @@ std::vector< int > Btree::MinBoundingRegion(const std::vector< std::vector<int >
   return mbr;
 }
 
+
+
+bool Btree::FreeNode(const Node& n,FileHandler& fh){
+  return (fh.UnpinPage(n.pageId));
+}
+
+
+int Btree::LeastIncreasingMBR( const std::vector< int >& p ,const std::vector< std::vector< int > >& possMBRs,int nsize ){
+  int minInc = INT_MAX;
+  int idx = -1;
+  for( int i = 0; i < nsize; i++){
+    int inc = VolMBR( MinBoundingRegion({p,possMBRs[i]},2) )  - VolMBR(possMBRs[i]);
+    if( minInc > inc ){
+      minInc = inc;
+      idx = i;
+    }
+  }
+  return idx;
+}
+
+
+void Btree::Insert(const std::vector< int >& p, FileHandler& fh){
+  Node r = DiskRead(rootPageId,fh);
+  if( r.size == maxCap ){
+    Node s = AllocateNode(fh,-1);
+    s.leaf = false;
+    s.size = 1;
+    s.childptr[0] = r.pageId;
+    r.parentId = s.pageId;
+    s.MBR = r.MBR;
+    SplitChild(0,s,fh);
+    FreeNode(r,fh); // since it has been updated on disk by SplitChild
+    height += 1;
+    InsertNonFull(p,s,fh);
+  }
+  else InsertNonFull(p,r,fh);
+}
+
+
+
+
+void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh){
+  if( !n.leaf ){
+    for( int i = 0; i < n.size; i++){
+      if (contains(p,n.childMBR[i])){
+        Node ch = DiskRead(n.childptr[i],fh);
+        if(ch.size == maxCap) {
+          SplitChild(i,n,fh);
+          FreeNode(ch,fh); // ch is deleted on the disk by SplitChild, deleting the old copy
+          InsertNonFull(p,n,fh);
+        }
+        FreeNode(n,fh);
+        InsertNonFull(p,ch,fh);
+        return;
+      }
+    }
+    int idx = LeastIncreasingMBR(p,n.childMBR,n.size);
+    Node ch = DiskRead(n.childptr[idx],fh);
+    if(ch.size == maxCap) {
+      SplitChild(idx,n,fh);
+      FreeNode(ch,fh); // ch is deleted on the disk by SplitChild, deleting the old copy
+      InsertNonFull(p,n,fh);
+    }
+    n.childMBR[idx] = MinBoundingRegion({p,n.childMBR[idx]},2);
+    n.MBR = MinBoundingRegion( n.childMBR, n.size);
+    DiskWrite(n,fh);
+    InsertNonFull(p,ch,fh);
+  }
+  else{
+    // We can simply Add to leaf,since the n.size is always < maxCap 
+    // as we always recur to Nodes which are nonfull
+    n.childMBR[n.size] = p;
+    n.size += 1;
+    n.MBR = MinBoundingRegion(n.childMBR,n.size);
+    
+  }
+}
+
+
+
 void Btree::SplitChild(int k,Node& n,FileHandler& fh){
   int id = n.childptr[k];
   Node ch = DiskRead(id,fh);
@@ -224,6 +305,10 @@ std::vector< Node > Btree::QuadraticSplit(const Node& n, FileHandler& fh){
     n2.childptr[n2.size] = n.childptr[i];
     n2.size += 1;
   }
+  n1.leaf = n.leaf;
+  n2.leaf = n.leaf;
+  n1.MBR = MinBoundingRegion(n1.childMBR,n1.size);
+  n2.MBR = MinBoundingRegion(n2.childMBR,n2.size);
   return (std::vector< Node >({n1,n2}));
 }
 

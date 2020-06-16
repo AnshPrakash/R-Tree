@@ -35,14 +35,17 @@ public:
   Node AllocateNode(FileHandler&,int parentid);       // Allocate page for the node
   bool Equal(Node& n1,Node& n2);                      //check if two Node are equal or not just for debugging purpose
   bool DeleteNode(Node& n, FileHandler& fh);          // delete the node from disk
+  bool FreeNode(const Node& n,FileHandler& fh);              // free node from memory still remains on disk
   void SplitChild(int k,Node& n,FileHandler& fh);     // split kth child of node
   // Todo
-  bool Insert(const std::vector< int >& MBR, FileHandler& fh);
-  bool InsertNonFull(const std::vector< int >& MBR, int nodeid, FileHandler& fh);
+  void Insert(const std::vector< int >& p, FileHandler& fh);
+  void InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh);
   std::vector< Node > QuadraticSplit(const Node& n, FileHandler& fh);  // split a node into two and return the nodes as vector
   bool Search(const std::vector< int >& MBR, int nodeid, FileHandler& fh);
   bool BulkLoad(FileHandler& fh, FileHandler& input);
   //helper functions
+  // return the index of the MBRs which expands the least when p is included in it
+  int LeastIncreasingMBR( const std::vector< int >& p ,const std::vector< std::vector< int > >& possMBRs, int nsize); 
   std::vector< int > seed(const Node& n);             // seed the QudraticSplit Algo
   bool contains(const std::vector< int >& p, const std::vector< int >& MBR);        // check if MBR contains p
   int VolMBR( const std::vector< int >&);                                //volume of single MBR
