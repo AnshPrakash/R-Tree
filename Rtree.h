@@ -41,7 +41,7 @@ public:
   void Insert(const std::vector< int >& p, FileHandler& fh);
   void InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh);
   std::vector< Node > QuadraticSplit(const Node& n, FileHandler& fh);  // split a node into two and return the nodes as vector
-  bool Search(const std::vector< int >& MBR, int nodeid, FileHandler& fh);
+  bool Search(const std::vector< int >& p, int nodeid, FileHandler& fh);
   bool BulkLoad(FileHandler& fh, FileHandler& input);
   //helper functions
   // return the index of the MBRs which expands the least when p is included in it
