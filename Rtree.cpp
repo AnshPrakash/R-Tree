@@ -165,6 +165,7 @@ void Btree::Insert(const std::vector< int >& p, FileHandler& fh){
     s.MBR = r.MBR;
     SplitChild(0,s,fh);
     FreeNode(r,fh); // since it has been updated on disk by SplitChild
+    rootPageId = s.pageId;
     height += 1;
     InsertNonFull(p,s,fh);
   }
