@@ -184,6 +184,7 @@ void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh)
           SplitChild(i,n,fh);
           FreeNode(ch,fh); // ch is deleted on the disk by SplitChild, deleting the old copy
           InsertNonFull(p,n,fh);
+          return;
         }
         FreeNode(n,fh);
         InsertNonFull(p,ch,fh);
