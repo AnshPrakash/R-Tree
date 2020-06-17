@@ -318,14 +318,14 @@ std::vector< Node > Btree::QuadraticSplit(const Node& n, FileHandler& fh){
 
 bool Btree::Search(const std::vector< int >& p,int nodeid, FileHandler& fh){
   Node n = DiskRead(nodeid,fh);
-  for( int i = 0; i < n.size; i++){
-    if (contains(p,n.childMBR[i])){
+  bool find = false;
+  for(int i = 0; i < n.size && !find; i++){
+    if( contains(p,n.childMBR[i]) ){
       int childId = n.childptr[i];
-      int isleaf = n.leaf;
-      FreeNode(n,fh);
-      if(!isleaf) return Search(p,childId,fh);
-      else return true;
+      if(!n.leaf) find = find || Search(p,childId,fh);
+      else find = find || true;
     }
   }
-  return false;
+  FreeNode(n,fh);
+  return find;
 }
