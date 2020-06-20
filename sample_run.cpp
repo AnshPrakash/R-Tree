@@ -35,7 +35,7 @@ int main() {
 	fm.CloseFile(fh);
 
 	// Reopen the same file, but for reading this time
-	fh = fm.OpenFile ("temp.txt");
+	fh = fm.OpenFile("temp.txt");
 	cout << "File opened" << endl;
 
 	// Get the very first page and its data

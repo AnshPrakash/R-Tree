@@ -1,5 +1,4 @@
 #include "Rtree.h"
-#include<cstring>
 #include <cmath>
 
 

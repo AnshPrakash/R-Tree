@@ -4,6 +4,8 @@
 #include <limits.h>
 #include <vector>
 #include "file_manager.h"
+#include <string>
+#include<cstring>
 
 
 class Node{
@@ -42,7 +44,8 @@ public:
   void InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh);
   std::vector< Node > QuadraticSplit(const Node& n, FileHandler& fh);  // split a node into two and return the nodes as vector
   bool Search(const std::vector< int >& p, int nodeid, FileHandler& fh);
-  bool BulkLoad(FileHandler& fh, FileHandler& input);
+  void bulk_load(FileManager& fm, FileHandler& fh, std::string input_file, int N);
+  int Allocate_points(std::vector< std::vector<int >> data, FileHandler& fh, int N, bool is_leaf, std::vector<int> pageIds);
   //helper functions
   // return the index of the MBRs which expands the least when p is included in it
   int LeastIncreasingMBR( const std::vector< int >& p ,const std::vector< std::vector< int > >& possMBRs, int nsize);
