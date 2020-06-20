@@ -2,7 +2,7 @@
 
 
 void Btree::bulk_load(FileHandler& fh_1, FileHandler& fh, int N){
-  PageHandler ph = fh_1.FirstPage ();
+  PageHandler ph = fh_1.FirstPage();
   int pts_per_page = PAGE_CONTENT_SIZE/(sizeof(int)*d);
   int pts_last_page = N%pts_per_page;
   int num_pages = 1 + ((N - 1) / pts_per_page); //ceil quotient

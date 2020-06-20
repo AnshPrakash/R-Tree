@@ -22,7 +22,8 @@ int main(int argc, char const *argv[]){
       inp >> bulkFile;
       int numpoints;
       inp >> numpoints;
-      // rt.bulk_load(fh,bulkFile,numpoints);
+      FileHandler fh1 = fm.OpenFile(bulkFile.c_str());
+      // rt.bulk_load(fh1,fh,numpoints);
     }
     else if( line == "INSERT"){
       std::vector< int > p(2*dimensionality);
@@ -30,7 +31,7 @@ int main(int argc, char const *argv[]){
         inp >> p[2*i];
         p[2*i + 1] = p[2*i];
       }
-      rt.Insert(p,fh);
+      // rt.Insert(p,fh);
     }
     else if( line == "QUERY"){
       std::vector< int > p(2*dimensionality);
