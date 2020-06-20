@@ -10,16 +10,16 @@ testt.o: testAllocateNode.cpp
 	g++ -std=c++11 -o testt.o -c testAllocateNode.cpp
 
 rtree.o: Rtree.cpp
-	g++ -std=c++11 -o rtree.o -c Rtree.cpp
+	g++ -Wall -Wextra -pedantic -std=c++11 -O2 -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o rtree.o -c Rtree.cpp 
 
 sample_run.o : sample_run.cpp
 	g++ -std=c++11 -c sample_run.cpp
 
 buffer_manager.o : buffer_manager.cpp
-	g++ -std=c++11 -c buffer_manager.cpp
+	g++ -std=c++11 -c buffer_manager.cpp 
 
 file_manager.o : file_manager.cpp
-	g++ -std=c++11 -c file_manager.cpp
+	g++ -std=c++11 -c file_manager.cpp 
 
 
 
