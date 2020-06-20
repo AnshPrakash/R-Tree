@@ -102,21 +102,21 @@ bool Btree::contains(const std::vector< int >& p, const std::vector< int >& MBR)
   return true;
 }
 
-int Btree::VolMBR( const std::vector< int >& MBR){
-  int vol = 1;
+double Btree::VolMBR( const std::vector< int >& MBR){
+  double vol = 1.0;
   for(int i = 0; i < d; i++) vol = vol*(MBR[2*i + 1] - MBR[2*i]);
   return vol;
 }
 
-int Btree::VolMBRS( const std::vector< std::vector<int >>& MBRs, int nsize){
-  int vol = 0;
+double Btree::VolMBRS( const std::vector< std::vector<int >>& MBRs, int nsize){
+  double vol = 0;
   for( int i = 0 ; i < nsize; i++) vol += VolMBR(MBRs[i]);
   return vol;
 }
 
-int Btree::DeadSpace(int nsize ,const std::vector< std::vector<int >>& Elist , const std::vector< int >& MBR){
-  int v1 = VolMBRS(Elist,nsize);
-  int v2 = VolMBR(MBR);
+double Btree::DeadSpace(int nsize ,const std::vector< std::vector<int >>& Elist , const std::vector< int >& MBR){
+  double v1 = VolMBRS(Elist,nsize);
+  double v2 = VolMBR(MBR);
   return ( v2 - v1);
 }
 
@@ -141,10 +141,10 @@ bool Btree::FreeNode(const Node& n,FileHandler& fh){
 
 
 int Btree::LeastIncreasingMBR( const std::vector< int >& p ,const std::vector< std::vector< int > >& possMBRs,int nsize ){
-  int minInc = INT_MAX;
+  double minInc = INT_MAX;
   int idx = -1;
   for( int i = 0; i < nsize; i++){
-    int inc = VolMBR( MinBoundingRegion({p,possMBRs[i]},2) )  - VolMBR(possMBRs[i]);
+    double inc = VolMBR( MinBoundingRegion({p,possMBRs[i]},2) )  - VolMBR(possMBRs[i]);
     if( minInc > inc ){
       minInc = inc;
       idx = i;
@@ -234,12 +234,12 @@ void Btree::SplitChild(int k,Node& n,FileHandler& fh){
 
 
 std::vector< int > Btree::seed(const Node& n){
-  int maxdiff = -1;
+  double maxdiff = -1;
   int e1,e2;
   e1 = e2 = -1;
   for(int i = 0; i < n.size; i++){
     for(int j = i + 1; j < n.size; j++){
-      int val = DeadSpace(2,{n.childMBR[i],n.childMBR[i]},MinBoundingRegion({n.childMBR[i],n.childMBR[i]},2));
+      double val = DeadSpace(2,{n.childMBR[i],n.childMBR[i]},MinBoundingRegion({n.childMBR[i],n.childMBR[i]},2));
       if( maxdiff < val ){
         maxdiff = val ;
         e1 = i;
@@ -262,11 +262,11 @@ std::vector< Node > Btree::QuadraticSplit(const Node& n, FileHandler& fh){
   mbrL1.push_back(n.childMBR[e1]);
   mbrL2.push_back(n.childMBR[e2]);
   while( !E.empty() ){
-    int maxdiff = -1;
+    double maxdiff = -1;
     int idx = -1;
     std::vector<std::vector< int >> tp1,tp2;
     for(auto i: E){
-      int d1,d2;
+      double d1,d2;
       std::vector<std::vector< int >> temp1,temp2;
       temp1 = mbrL1;temp2 = mbrL2;
       temp1.push_back(n.childMBR[i]);
@@ -280,9 +280,9 @@ std::vector< Node > Btree::QuadraticSplit(const Node& n, FileHandler& fh){
         tp2 = temp2;
       }
     }
-    int d1 = VolMBRS({MinBoundingRegion(tp1,tp1.size())},1);
+    double d1 = VolMBRS({MinBoundingRegion(tp1,tp1.size())},1);
     d1 -= VolMBRS(mbrL1,mbrL1.size());
-    int d2 = VolMBRS({MinBoundingRegion(tp2,tp2.size())},1);
+    double d2 = VolMBRS({MinBoundingRegion(tp2,tp2.size())},1);
     d2 -= VolMBRS(mbrL2,mbrL2.size());
     if( d1 < d2 ){
       mbrL1 = tp1;

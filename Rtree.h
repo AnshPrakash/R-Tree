@@ -45,12 +45,12 @@ public:
   bool BulkLoad(FileHandler& fh, FileHandler& input);
   //helper functions
   // return the index of the MBRs which expands the least when p is included in it
-  int LeastIncreasingMBR( const std::vector< int >& p ,const std::vector< std::vector< int > >& possMBRs, int nsize); 
+  int LeastIncreasingMBR( const std::vector< int >& p ,const std::vector< std::vector< int > >& possMBRs, int nsize);
   std::vector< int > seed(const Node& n);             // seed the QudraticSplit Algo
   bool contains(const std::vector< int >& p, const std::vector< int >& MBR);        // check if MBR contains p
-  int VolMBR( const std::vector< int >&);                                //volume of single MBR
-  int VolMBRS( const std::vector< std::vector<int >>& MBRs, int nsize); // sum of volume of all MBRs
-  int DeadSpace( int nsize, const std::vector< std::vector<int >>& Elist , const std::vector< int >& MBR);// wasted space in MBR containing E list MBRs
+  double VolMBR( const std::vector< int >&);                                //volume of single MBR
+  double VolMBRS( const std::vector< std::vector<int >>& MBRs, int nsize); // sum of volume of all MBRs
+  double DeadSpace( int nsize, const std::vector< std::vector<int >>& Elist , const std::vector< int >& MBR);// wasted space in MBR containing E list MBRs
   std::vector< int > MinBoundingRegion(const std::vector< std::vector<int >>& Elist, int nsize);    //  minimum bounding region of a list of MBR
 };
 
