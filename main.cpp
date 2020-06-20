@@ -22,8 +22,9 @@ int main(int argc, char const *argv[]){
       inp >> bulkFile;
       int numpoints;
       inp >> numpoints;
-      FileHandler fh1 = fm.OpenFile(bulkFile.c_str());
+      // FileHandler fh1 = fm.OpenFile(bulkFile.c_str());
       // rt.bulk_load(fh1,fh,numpoints);
+      // fm.CloseFile(fh1);
     }
     else if( line == "INSERT"){
       std::vector< int > p(2*dimensionality);
@@ -39,7 +40,8 @@ int main(int argc, char const *argv[]){
         inp >> p[2*i];
         p[2*i + 1] = p[2*i];
       }
-      // rt.Search(p,rt.rootPageId,fh);
+      if (rt.Search(p,rt.rootPageId,fh)) out << "TRUE\n\n";
+      else out << "FALSE\n\n";
     }
     else  std::cerr <<"Input file incorrect\n";
     // if(line == "BULKLOAD") std::cout << "true\n\";
