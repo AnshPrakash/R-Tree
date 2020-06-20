@@ -1,8 +1,7 @@
 #include "Rtree.h"
 
 
-void Btree::bulk_load(FileManager& fm, FileHandler& fh, std::string input_file, int N){
-  FileHandler fh_1 = fm.OpenFile(input_file.c_str());
+void Btree::bulk_load(FileHandler& fh_1, FileHandler& fh, int N){
   PageHandler ph = fh_1.FirstPage ();
   int pts_per_page = PAGE_CONTENT_SIZE/(sizeof(int)*d);
   int pts_last_page = N%pts_per_page;
@@ -39,11 +38,10 @@ void Btree::bulk_load(FileManager& fm, FileHandler& fh, std::string input_file, 
       continue; //if intermediate page contains <max pts
     }
   }
-  fm.CloseFile (fh_1);
-  rootPageId=Allocate_points(ret, fh, N, true);
+  rootPageId=Allocate_points(ret, fh, N, true, std::vector<int>(N,-1));
 }
 
-int Btree::Allocate_points(std::vector< std::vector<int >> data, FileHandler& fh, int N, bool is_leaf, std::vector<int> pageIds=std::vector<int>(data.size(),-1)){
+int Btree::Allocate_points(std::vector< std::vector<int >> data, FileHandler& fh, int N, bool is_leaf, std::vector<int> pageIds){
   height+=1;
   int num_blocks = 1 + ((N - 1) / maxCap);
   int size = maxCap;
