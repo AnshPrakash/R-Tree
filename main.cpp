@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]){
         inp >> p[2*i];
         p[2*i + 1] = p[2*i];
       }
-      // rt.Insert(p,fh);
+      rt.Insert(p,fh);
     }
     else if( line == "QUERY"){
       std::vector< int > p(2*dimensionality);
@@ -44,8 +44,6 @@ int main(int argc, char const *argv[]){
       else out << "FALSE\n\n";
     }
     else  std::cerr <<"Input file incorrect\n";
-    // if(line == "BULKLOAD") std::cout << "true\n\";
-    // out << line<<"\n";
   }
   inp.close();
   out.close();

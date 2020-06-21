@@ -1,13 +1,15 @@
 #ifndef RTREE_H
 #define RTREE_H
 
-#include <limits.h>
+#include <limits>
 #include <vector>
 #include "file_manager.h"
 #include "errors.h"
 #include <string>
 #include <cstring>
 
+#define INT_MIN std::numeric_limits<int>::min()
+#define INT_MAX std::numeric_limits<int>::max()
 
 class Node{
 public:

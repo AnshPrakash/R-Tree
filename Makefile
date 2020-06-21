@@ -10,25 +10,25 @@ sample_run : $(sampleobjects)
 	g++ -std=c++11 -o sample_run $(sampleobjects)
 
 main.o: main.cpp
-	g++ -Wall -g -Wextra -pedantic -std=c++11 -O2 -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o main.o -c main.cpp 
+	g++ -Wall -g -Wextra -pedantic -std=c++11  -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o main.o -c main.cpp 
 
 testt.o: testAllocateNode.cpp
 	g++ -std=c++11 -o testt.o -c testAllocateNode.cpp
 
 tree.o: Rtree.cpp
-	g++ -Wall -g -Wextra -pedantic -std=c++11 -O2 -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o tree.o -c Rtree.cpp 
+	g++ -Wall -g -Wextra -pedantic -std=c++11  -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o tree.o -c Rtree.cpp 
 
 bulk.o: bulk_load.cpp
-	g++ -Wall -g -Wextra -pedantic -std=c++11 -O2 -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o bulk.o -c bulk_load.cpp 
+	g++ -Wall -g -Wextra -pedantic -std=c++11  -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o bulk.o -c bulk_load.cpp 
 
 sample_run.o : sample_run.cpp
 	g++ -std=c++11 -c sample_run.cpp
 
 buffer_manager.o : buffer_manager.cpp
-	g++ -std=c++11 -c buffer_manager.cpp 
+	g++ -Wall -g -std=c++11 -c buffer_manager.cpp 
 
 file_manager.o : file_manager.cpp
-	g++ -std=c++11 -c file_manager.cpp 
+	g++ -Wall -g -std=c++11 -c file_manager.cpp 
 
 
 
