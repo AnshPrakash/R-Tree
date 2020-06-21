@@ -165,15 +165,14 @@ void Btree::Insert(const std::vector< int >& p, FileHandler& fh){
     s.MBR = r.MBR;
     s.childMBR[0] = r.MBR;
     DiskWrite(r,fh);
-    SplitChild(0,s,fh);
+    SplitChild(0,s,fh); // s  and ith split child to disk
+    s = DiskRead(s.pageId,fh);
     rootPageId = s.pageId;
     height += 1;
     InsertNonFull(p,s,fh);
   }
   else InsertNonFull(p,r,fh);
 }
-
-
 
 
 void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh){
@@ -184,7 +183,8 @@ void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh)
     //     if(ch.size == maxCap) {
     //       SplitChild(i,n,fh);
     //       FreeNode(ch,fh); // ch is deleted on the disk by SplitChild, deleting the old copy
-    //       InsertNonFull(p,n,fh);
+    //       if(n.size == maxCap) Insert(p,fh);
+    //       else InsertNonFull(p,n,fh); 
     //       return;
     //     }
     //     FreeNode(n,fh);
@@ -192,12 +192,16 @@ void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh)
     //     return;
     //   }
     // }
-    int idx = LeastIncreasingMBR(p,n.childMBR,n.size);
+    int idx = LeastIncreasingMBR(p, n.childMBR, n.size);
     Node ch = DiskRead(n.childptr[idx],fh);
-    if(ch.size == maxCap) {
-      SplitChild(idx,n,fh);
-      FreeNode(ch,fh);      // ch is deleted on the disk by SplitChild, deleting the old copy
-      InsertNonFull(p,n,fh);
+    FreeNode(ch,fh);
+    if(ch.size == maxCap){
+      SplitChild(idx,n,fh); // cannot use the nodes which are written to disk 
+      if(n.size == maxCap) Insert(p,fh);
+      else{
+        n = DiskRead(n.pageId,fh); // re-read the node which have been written to disk
+        InsertNonFull(p,n,fh);
+      }
       return;
     }
     n.childMBR[idx] = MinBoundingRegion({p,n.childMBR[idx]},2);
@@ -222,7 +226,7 @@ void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh)
 void Btree::SplitChild(int k,Node& n,FileHandler& fh){
   int id = n.childptr[k];
   Node ch = DiskRead(id,fh);
-  std::vector< Node > div = QuadraticSplit(ch,fh); 
+  std::vector< Node > div = QuadraticSplit(ch,fh);
   Node n1,n2;
   n1 = div[0], n2 = div[1];
   n.childptr[k] = n1.pageId;

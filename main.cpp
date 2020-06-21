@@ -45,6 +45,7 @@ int main(int argc, char const *argv[]){
     }
     else  std::cerr <<"Input file incorrect\n";
   }
+
   inp.close();
   out.close();
   fm.CloseFile(fh);
