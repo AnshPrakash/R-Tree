@@ -38,3 +38,4 @@ clean :
 	rm -f sample_run
 	rm -f testrun
 	rm -f temp.txt
+	rm -f rtree

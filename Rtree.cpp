@@ -28,6 +28,7 @@ Node Btree::AllocateNode(FileHandler& fh, int parentId ){
   PageHandler ph = fh.NewPage();
   Node n = Node(d,maxCap);
   n.pageId = ph.GetPageNum();
+  std::cout <<"Allocated " << n.pageId << "\n";
   n.parentId = parentId;
   return n;
 }
@@ -92,6 +93,8 @@ bool Btree::Equal(Node& n1,Node& n2){
 
 
 bool Btree::DeleteNode(Node& n, FileHandler& fh){
+  // return (fh.UnpinPage(n.pageId));
+  std::cout << "Delete " << n.pageId <<"\n";
   return (fh.DisposePage(n.pageId));
 }
 
@@ -156,8 +159,10 @@ int Btree::LeastIncreasingMBR( const std::vector< int >& p ,const std::vector< s
 
 void Btree::Insert(const std::vector< int >& p, FileHandler& fh){
   Node r = DiskRead(rootPageId,fh);
+  // std::cout <<" Root Size "<< r.size<<" maxcap " << maxCap <<"\n";
   if( r.size == maxCap ){
     Node s = AllocateNode(fh,-1);
+    // std::cout << " Height Increased " << s.pageId <<"\n";
     s.leaf = false;
     s.size = 1;
     s.childptr[0] = r.pageId;
@@ -176,6 +181,7 @@ void Btree::Insert(const std::vector< int >& p, FileHandler& fh){
 
 
 void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh){
+  // std::cout <<" Node Size "<< n.size<<" node PageId " << n.pageId <<"\n";
   if( !n.leaf ){
     // for( int i = 0; i < n.size; i++){
     //   if (contains(p,n.childMBR[i])){
@@ -194,14 +200,15 @@ void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh)
     // }
     int idx = LeastIncreasingMBR(p, n.childMBR, n.size);
     Node ch = DiskRead(n.childptr[idx],fh);
-    FreeNode(ch,fh);
     if(ch.size == maxCap){
-      SplitChild(idx,n,fh); // cannot use the nodes which are written to disk 
-      if(n.size == maxCap) Insert(p,fh);
-      else{
-        n = DiskRead(n.pageId,fh); // re-read the node which have been written to disk
-        InsertNonFull(p,n,fh);
+      FreeNode(ch,fh);
+      SplitChild(idx,n,fh); // cannot use the nodes which are written to disk
+      n = DiskRead(n.pageId,fh); // re-read the node which have been written to disk
+      if(n.size == maxCap){
+        FreeNode(n,fh);
+        Insert(p,fh);
       }
+      else InsertNonFull(p,n,fh);
       return;
     }
     n.childMBR[idx] = MinBoundingRegion({p,n.childMBR[idx]},2);
@@ -225,6 +232,7 @@ void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh)
 
 void Btree::SplitChild(int k,Node& n,FileHandler& fh){
   int id = n.childptr[k];
+  std::cout<< k  << "Split !!"<< n.pageId  << " \n";
   Node ch = DiskRead(id,fh);
   std::vector< Node > div = QuadraticSplit(ch,fh);
   Node n1,n2;
@@ -330,14 +338,37 @@ std::vector< Node > Btree::QuadraticSplit(const Node& n, FileHandler& fh){
 
 bool Btree::Search(const std::vector< int >& p,int nodeid, FileHandler& fh){
   Node n = DiskRead(nodeid,fh);
+  // std::cout << height<<"\n";
+  // std::cout << n.pageId <<": ";
   bool find = false;
   for(int i = 0; i < n.size && !find; i++){
+    // std::cout << n.childptr[i] <<" , ";
     if( contains(p,n.childMBR[i]) ){
       int childId = n.childptr[i];
       if(!n.leaf) find = find || Search(p,childId,fh);
       else find = find || true;
     }
   }
+  // std::cout <<"\n";
   FreeNode(n,fh);
   return find;
+}
+
+void Btree::PrintTree(FileHandler& fh){
+  try{
+    PageHandler ph = fh.LastPage();
+    std::cout << "Last Page "<< ph.GetPageNum() <<"\n";
+    ph = fh.FirstPage();
+    // PageHandler ph = fh.FirstPage();
+    while(1){
+      int id = ph.GetPageNum();
+      fh.UnpinPage(id);
+      Node n = DiskRead(id,fh);
+      std::cout <<" Node at Page Id = "<< n.pageId<<" Parent Of " << n.parentId<<"\n";
+      ph = fh.NextPage(id);
+    }
+  }
+  catch(InvalidPageException){
+    std::cout <<" File Ended\n";
+  }
 }

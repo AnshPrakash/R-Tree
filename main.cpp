@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include "Rtree.h"
@@ -22,6 +21,7 @@ int main(int argc, char const *argv[]){
       inp >> bulkFile;
       int numpoints;
       inp >> numpoints;
+      // out << "BULKLOAD\n\n";
       // FileHandler fh1 = fm.OpenFile(bulkFile.c_str());
       // rt.bulk_load(fh1,fh,numpoints);
       // fm.CloseFile(fh1);
@@ -32,6 +32,8 @@ int main(int argc, char const *argv[]){
         inp >> p[2*i];
         p[2*i + 1] = p[2*i];
       }
+      out << "INSERT\n\n";
+      std::cout << "INSERT\n";
       rt.Insert(p,fh);
     }
     else if( line == "QUERY"){
@@ -46,9 +48,11 @@ int main(int argc, char const *argv[]){
     else  std::cerr <<"Input file incorrect\n";
   }
 
+  rt.PrintTree(fh);
   inp.close();
   out.close();
   fm.CloseFile(fh);
   fm.DestroyFile("RTREE_INDEX.txt");
+  std::cout <<"Excution finished with success\n";
   return 0;
 }
