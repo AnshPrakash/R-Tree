@@ -1,41 +1,19 @@
-sampleobjects = buffer_manager.o file_manager.o sample_run.o
+CC = g++
 
-rtree: buffer_manager.o file_manager.o tree.o bulk.o main.o
-	g++ -Wall -g -std=c++11 -o rtree buffer_manager.o file_manager.o tree.o bulk.o main.o
+TARGET = rtree
+OBJECTS = $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
-testrun: buffer_manager.o file_manager.o testt.o tree.o bulk.o
-	g++ -std=c++11 -o testrun buffer_manager.o file_manager.o testt.o tree.o bulk.o
+# CFLAGS = -std=c++11 -Wall -Ofast
+CFLAGS = -Wall -g -Wextra -pedantic -std=c++11  -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align
 
-sample_run : $(sampleobjects)
-	g++ -std=c++11 -o sample_run $(sampleobjects)
+$(TARGET): $(OBJECTS)
+	$(CC) $^ -o $(TARGET)
 
-main.o: main.cpp
-	g++ -Wall -g -Wextra -pedantic -std=c++11  -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o main.o -c main.cpp 
+$(OBJECTS): %.o: %.cpp
+	$(CC) -c $(CFLAGS) $< -o $@
 
-testt.o: testAllocateNode.cpp
-	g++ -std=c++11 -o testt.o -c testAllocateNode.cpp
-
-tree.o: Rtree.cpp
-	g++ -Wall -g -Wextra -pedantic -std=c++11  -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o tree.o -c Rtree.cpp 
-
-bulk.o: bulk_load.cpp
-	g++ -Wall -g -Wextra -pedantic -std=c++11  -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -o bulk.o -c bulk_load.cpp 
-
-sample_run.o : sample_run.cpp
-	g++ -std=c++11 -c sample_run.cpp
-
-buffer_manager.o : buffer_manager.cpp
-	g++ -Wall -g -std=c++11 -c buffer_manager.cpp 
-
-file_manager.o : file_manager.cpp
-	g++ -Wall -g -std=c++11 -c file_manager.cpp 
-
-
-
-
-clean :
+clean: 
 	rm -f *.o
-	rm -f sample_run
-	rm -f testrun
-	rm -f temp.txt
 	rm -f rtree
+
+.PHONY: clean
