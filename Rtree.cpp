@@ -13,7 +13,8 @@ Node::Node(int d, int maxCap){
 Btree::Btree(int dim, int maxChildren, FileHandler& fh){
   d = dim;
   maxCap =  (PAGE_CONTENT_SIZE - 8*d - 16)/(8*d+4);
-  maxCap = std::min(maxChildren,maxCap); //  fit in a page
+  maxCap = std::min(maxChildren,maxCap); // fit in a page
+  maxCap = std::max(3,maxCap);           // maxCap should be greater than 2
   m = (int)ceil(maxCap/2.0);
   height = 0;
   Node root = AllocateNode(fh,-1);
@@ -28,7 +29,7 @@ Node Btree::AllocateNode(FileHandler& fh, int parentId ){
   PageHandler ph = fh.NewPage();
   Node n = Node(d,maxCap);
   n.pageId = ph.GetPageNum();
-  std::cout <<"Allocated " << n.pageId << "\n";
+  // std::cout <<"Allocated " << n.pageId << "\n";
   n.parentId = parentId;
   return n;
 }
@@ -47,13 +48,13 @@ Node Btree::DiskWrite(Node& n,FileHandler& fh){
   v.push_back(n.leaf);
   v.push_back(n.size);
   memcpy(&data[0],&v[0],v.size()*sizeof(int));
-  std::cout << "\n DiskWrite " << n.pageId <<"\n";
-  std::cout << " MarkDirty "<<fh.MarkDirty(n.pageId)<<"\n";
-  std::cout << " UnpinPage "<<fh.UnpinPage(n.pageId)<<"\n";
-  std::cout << " FlushPage "<<fh.FlushPage(n.pageId)<<"\n\n";
-  // fh.MarkDirty(n.pageId)
-  // fh.UnpinPage(n.pageId);
-  // fh.FlushPage(n.pageId);
+  // std::cout << "\n DiskWrite " << n.pageId <<"\n";
+  // std::cout << " MarkDirty "<<fh.MarkDirty(n.pageId)<<"\n";
+  // std::cout << " UnpinPage "<<fh.UnpinPage(n.pageId)<<"\n";
+  // std::cout << " FlushPage "<<fh.FlushPage(n.pageId)<<"\n\n";
+  fh.MarkDirty(n.pageId);
+  fh.UnpinPage(n.pageId);
+  fh.FlushPage(n.pageId);
   return n;
 }
 
@@ -97,9 +98,8 @@ bool Btree::Equal(Node& n1,Node& n2){
 
 
 bool Btree::DeleteNode(Node& n, FileHandler& fh){
-  std::cout << " Delete Node " << n.pageId <<"\n";
-  // return (fh.UnpinPage(n.pageId));
-  std::cout << " mark delete " << fh.MarkDirty(n.pageId) <<"\n";
+  // std::cout << " Delete Node " << n.pageId <<"\n";
+  // std::cout << " mark delete " << fh.MarkDirty(n.pageId) <<"\n";
   return (fh.DisposePage(n.pageId));
 }
 
@@ -144,7 +144,6 @@ std::vector< int > Btree::MinBoundingRegion(const std::vector< std::vector<int >
 
 
 bool Btree::FreeNode(const Node& n,FileHandler& fh){
-  std::cout <<" FreeNode " << n.pageId <<"\n";
   bool res = fh.UnpinPage(n.pageId);
   res = res && fh.FlushPage(n.pageId);
   return(res);
@@ -243,7 +242,7 @@ void Btree::InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh)
 
 void Btree::SplitChild(int k,Node& n,FileHandler& fh){
   int id = n.childptr[k];
-  std::cout<< k  << "Split !!"<< n.pageId  << " \n";
+  // std::cout<< k  << "Split !!"<< n.pageId  << " \n";
   Node ch = DiskRead(id,fh);
   std::vector< Node > div = QuadraticSplit(ch,fh);
   Node n1,n2;
@@ -368,14 +367,14 @@ bool Btree::Search(const std::vector< int >& p,int nodeid, FileHandler& fh){
 void Btree::PrintTree(FileHandler& fh){
   try{
     PageHandler ph = fh.LastPage();
-    std::cout << "Last Page "<< ph.GetPageNum() <<"\n";
+    // std::cout << "Last Page "<< ph.GetPageNum() <<"\n";
     ph = fh.FirstPage();
     // PageHandler ph = fh.FirstPage();
     while(1){
       int id = ph.GetPageNum();
       fh.UnpinPage(id);
       Node n = DiskRead(id,fh);
-      std::cout <<" Node at Page Id = "<< n.pageId<<" Parent Of " << n.parentId<<"\n";
+      // std::cout <<" Node at Page Id = "<< n.pageId<<" Parent Of " << n.parentId<<"\n";
       ph = fh.NextPage(id);
     }
   }
