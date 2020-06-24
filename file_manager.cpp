@@ -205,12 +205,14 @@ bool FileHandler::DisposePage(int page_number) {
 // then before page is unpinned from buffer
 // it will be written to the file
 bool FileHandler::MarkDirty(int page_number) {
-	return bufferManager->MarkDirty(PageDescriptor(this->unix_file_desc,page_number));
+	auto pp = PageDescriptor(this->unix_file_desc,page_number);
+	return bufferManager->MarkDirty(pp);
 }
 
 // unpin page wrapper for buffer manager unpin page function
 bool FileHandler::UnpinPage(int page_number) {
-	return bufferManager->UnpinPage(PageDescriptor(this->unix_file_desc,page_number));
+	auto pp = PageDescriptor(this->unix_file_desc,page_number);
+	return bufferManager->UnpinPage(pp);
 }
 
 // flush all pages to file
@@ -234,7 +236,8 @@ bool FileHandler::FlushPage(int page_number) {
 		if(_wr_res<0) return false; //write error
 		this->hdrChanged =false;
 	}
-	return bufferManager->FlushPage(PageDescriptor(this->unix_file_desc,page_number));
+	auto pp = PageDescriptor(this->unix_file_desc,page_number);
+	return bufferManager->FlushPage(pp);
 }
 
 // check if page number is valid (in range)

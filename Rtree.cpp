@@ -47,9 +47,13 @@ Node Btree::DiskWrite(Node& n,FileHandler& fh){
   v.push_back(n.leaf);
   v.push_back(n.size);
   memcpy(&data[0],&v[0],v.size()*sizeof(int));
-  fh.MarkDirty(n.pageId);
-  fh.UnpinPage(n.pageId);
-  fh.FlushPage(n.pageId);
+  std::cout << "\n DiskWrite " << n.pageId <<"\n";
+  std::cout << " MarkDirty "<<fh.MarkDirty(n.pageId)<<"\n";
+  std::cout << " UnpinPage "<<fh.UnpinPage(n.pageId)<<"\n";
+  std::cout << " FlushPage "<<fh.FlushPage(n.pageId)<<"\n\n";
+  // fh.MarkDirty(n.pageId)
+  // fh.UnpinPage(n.pageId);
+  // fh.FlushPage(n.pageId);
   return n;
 }
 
@@ -93,8 +97,9 @@ bool Btree::Equal(Node& n1,Node& n2){
 
 
 bool Btree::DeleteNode(Node& n, FileHandler& fh){
+  std::cout << " Delete Node " << n.pageId <<"\n";
   // return (fh.UnpinPage(n.pageId));
-  std::cout << "Delete " << n.pageId <<"\n";
+  std::cout << " mark delete " << fh.MarkDirty(n.pageId) <<"\n";
   return (fh.DisposePage(n.pageId));
 }
 
@@ -139,7 +144,10 @@ std::vector< int > Btree::MinBoundingRegion(const std::vector< std::vector<int >
 
 
 bool Btree::FreeNode(const Node& n,FileHandler& fh){
-  return (fh.UnpinPage(n.pageId));
+  std::cout <<" FreeNode " << n.pageId <<"\n";
+  bool res = fh.UnpinPage(n.pageId);
+  res = res && fh.FlushPage(n.pageId);
+  return(res);
 }
 
 
@@ -169,9 +177,12 @@ void Btree::Insert(const std::vector< int >& p, FileHandler& fh){
     r.parentId = s.pageId;
     s.MBR = r.MBR;
     s.childMBR[0] = r.MBR;
+    // PrintNode(r);
     DiskWrite(r,fh);
     SplitChild(0,s,fh); // s  and ith split child to disk
+    // PrintNode(s);
     s = DiskRead(s.pageId,fh);
+    // PrintNode(s);
     rootPageId = s.pageId;
     height += 1;
     InsertNonFull(p,s,fh);
@@ -371,4 +382,21 @@ void Btree::PrintTree(FileHandler& fh){
   catch(InvalidPageException){
     std::cout <<" File Ended\n";
   }
+}
+
+void Btree::PrintNode(const Node& n){
+  std::cout <<"\n==============Start Node=============\n";
+  std::cout << "PageId "<< n.pageId<<"\n";
+  std::cout << "ParentId "<< n.parentId<<"\n";
+  std::cout << "MBR ";
+  for(auto &w: n.MBR) std::cout << w << " ";
+  std::cout <<"\n";
+  for(int i = 0; i < maxCap; i++ ){
+    std::cout << "MBR of child " << n.childptr[i] <<" -> \n" ;
+    for(auto &w: n.childMBR[i]) std::cout << w << " ";
+    std::cout <<"\n";
+  }
+  std::cout <<" Is Leaf " << n.leaf<<"\n";
+  std::cout <<" Size " << n.size<<"\n";
+  std::cout <<"==============End Node=============\n\n";
 }

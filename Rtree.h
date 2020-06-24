@@ -61,6 +61,7 @@ public:
 
   // For Debugging
   void PrintTree(FileHandler& fh);
+  void PrintNode(const Node& n);
 };
 
 

@@ -14,6 +14,24 @@ int main(int argc, char const *argv[]){
   int maxCap = atoi(argv[2]);
   int dimensionality = atoi(argv[3]);
   Btree rt = Btree(dimensionality,maxCap,fh);
+  // Node n = rt.AllocateNode(fh,-1);
+  // n.parentId = 43;
+  // int id = n.pageId;
+  // rt.FreeNode(n,fh);
+  // rt.PrintNode(n);
+  // rt.DiskWrite(n,fh);
+  // n = rt.DiskRead(id,fh);
+  // rt.PrintNode(n);
+
+  // rt.DeleteNode(n,fh);
+  // n = rt.AllocateNode(fh,17);
+  // // n.parentId = 17;
+  // n.parentId = 77;
+  // rt.PrintNode(n);
+  // rt.DiskWrite(n,fh);
+  // n = rt.DiskRead(id,fh);
+  // rt.PrintNode(n);
+
   std::string line;
   while(inp >> line){
     if(line == "BULKLOAD"){
@@ -47,7 +65,6 @@ int main(int argc, char const *argv[]){
     }
     else  std::cerr <<"Input file incorrect\n";
   }
-
   rt.PrintTree(fh);
   inp.close();
   out.close();
