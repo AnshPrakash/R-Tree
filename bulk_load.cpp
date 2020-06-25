@@ -3,21 +3,24 @@
 
 void Btree::bulk_load(FileHandler& fh_1, FileHandler& fh, int N){
   int startPageId,lastPageId;
-  PageHandler ph = fh_1.FirstPage ();
+  PageHandler ph = fh_1.LastPage();
+  int num_pages =  ph.GetPageNum() + 1;
+  fh_1.UnpinPage(num_pages-1);
+  fh_1.FlushPage(num_pages-1);
+  ph = fh_1.FirstPage ();
   int pts_per_page = PAGE_CONTENT_SIZE/(sizeof(int)*d);
   int pts_last_page = N%pts_per_page;
-  int num_pages = (int)ceil((N*1.0)/pts_per_page); //1 + ((N - 1) / pts_per_page); //ceil quotient
+  // int num_pages = (int)ceil((N*1.0)/pts_per_page); //1 + ((N - 1) / pts_per_page); //ceil quotient
   int cur_page = ph.GetPageNum();
-  startPageId = cur_page;
-  int read_num = 0;
+  startPageId = 0;
+  int read_num;
   int rem_pts = N;
-  for(int i = 0; i < num_pages; i++){ 
+  for(int i = 0; i < num_pages; i++){
     int num_ctr = 0; //which loc in page is being read
     char *data = ph.GetData();
-    //Assuming each point contains one int & last page contains rest of the vectors
     
-    if(i == num_pages-1 && N%pts_per_page != 0) //change
-      pts_per_page = pts_last_page;
+    //Assuming each point contains one int & last page contains rest of the vectors
+    if(i == num_pages-1 && N%pts_per_page != 0) pts_per_page = pts_last_page;
     
     std::vector< std::vector<int >> chmbrs = std::vector< std::vector< int > >(maxCap,std::vector< int >(2*d,INT_MIN));
     int child_count = 0;
@@ -31,7 +34,7 @@ void Btree::bulk_load(FileHandler& fh_1, FileHandler& fh, int N){
       }
       rem_pts--;
       chmbrs[child_count++] = push_pt;
-      if(child_count == maxCap || rem_pts == 0){
+      if(child_count == maxCap || rem_pts == 0 || j == pts_per_page - 1){
         Node n = AllocateNode(fh,-1);
         n.MBR = MinBoundingRegion(chmbrs,child_count);
         n.childMBR = chmbrs;
@@ -53,8 +56,6 @@ void Btree::bulk_load(FileHandler& fh_1, FileHandler& fh, int N){
   
   }
   height = 0;
-  fh_1.FlushPages();
-  // std::cout << startPageId <<" " << lastPageId <<"\n";
   AssignParents(startPageId,lastPageId,fh);
 }
 
