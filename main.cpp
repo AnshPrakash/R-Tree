@@ -21,10 +21,10 @@ int main(int argc, char const *argv[]){
       inp >> bulkFile;
       int numpoints;
       inp >> numpoints;
-      // out << "BULKLOAD\n\n";
-      // FileHandler fh1 = fm.OpenFile(bulkFile.c_str());
-      // rt.bulk_load(fh1,fh,numpoints);
-      // fm.CloseFile(fh1);
+      out << "BULKLOAD\n\n";
+      FileHandler fh1 = fm.OpenFile(bulkFile.c_str());
+      rt.bulk_load(fh1,fh,numpoints);
+      fm.CloseFile(fh1);
     }
     else if( line == "INSERT"){
       std::vector< int > p(2*dimensionality);

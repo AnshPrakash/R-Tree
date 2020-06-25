@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <cstring>
+#include <cmath>
 
 #define INT_MIN std::numeric_limits<int>::min()
 #define INT_MAX std::numeric_limits<int>::max()
@@ -47,8 +48,6 @@ public:
   void InsertNonFull(const std::vector< int >& p, Node& n, FileHandler& fh);
   std::vector< Node > QuadraticSplit(const Node& n, FileHandler& fh);  // split a node into two and return the nodes as vector
   bool Search(const std::vector< int >& p, int nodeid, FileHandler& fh);
-  void bulk_load(FileHandler& fh_1, FileHandler& fh, int N);
-  int Allocate_points(std::vector< std::vector<int >> data, FileHandler& fh, int N, bool is_leaf, std::vector<int> pageIds);
   //helper functions
   // return the index of the MBRs which expands the least when p is included in it
   int LeastIncreasingMBR( const std::vector< int >& p ,const std::vector< std::vector< int > >& possMBRs, int nsize);
@@ -62,6 +61,14 @@ public:
   // For Debugging
   void PrintTree(FileHandler& fh);
   void PrintNode(const Node& n);
+
+  //todo
+  void bulk_load(FileHandler& fh_1, FileHandler& fh, int N);
+  void AssignParents(int startPageId,int lastPageId, FileHandler& fh);
+  //modify in STRtree.cpp
+  void Strbulk_load(FileHandler& fh_1, FileHandler& fh, int N);
+  int AssignParents(std::vector< std::vector<int >> data, FileHandler& fh, int N, bool is_leaf, std::vector<int> pageIds);
+
 };
 
 

@@ -1,5 +1,5 @@
 #include "Rtree.h"
-#include <cmath>
+
 
 
 Node::Node(int d, int maxCap){
@@ -8,6 +8,7 @@ Node::Node(int d, int maxCap){
   childptr = std::vector< int >(maxCap,-1);
   size = 0;
 }
+
 
 
 Btree::Btree(int dim, int maxChildren, FileHandler& fh){
