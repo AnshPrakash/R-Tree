@@ -8,7 +8,14 @@ int main(int argc, char const *argv[]){
   std::ofstream out;
   if( argc < 5) std::cout << "Give correct parameters";
   FileManager fm;
-  FileHandler fh = fm.CreateFile("RTREE_INDEX.txt");
+  FileHandler fh;
+  try{
+    fh = fm.CreateFile("RTREE_INDEX.txt");
+  }
+  catch(...){
+    std::remove("RTREE_INDEX.txt");
+    fh = fm.CreateFile("RTREE_INDEX.txt"); 
+  }
   inp.open (argv[1]);
   out.open(argv[4]);
   int maxCap = atoi(argv[2]);
